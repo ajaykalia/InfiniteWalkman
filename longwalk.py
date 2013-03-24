@@ -17,7 +17,6 @@ import sys
 from time import sleep
 
 from pyechonest import config
-from echonest.remix.action import Playback, Jump, Fadeout, render, display_actions
 from echonest.remix.audio import LocalAudioFile
 
 from longwalk_support import evaluate_distance, matrix_whiten, resample_features_from_point, resample_features_from_vector
