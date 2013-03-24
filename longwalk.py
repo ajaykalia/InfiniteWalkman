@@ -102,10 +102,13 @@ def normalize_matrix(matrix):
 
 def play_beat(beat_index, track):
     start = track.analysis.beats[beat_index].start 
+    print 'actual start is %s ' % start
     beat_duration = track.analysis.beats[beat_index].duration 
+    print 'target duration is %s'% beat_duration
     pygame.mixer.music.play(1,start)
     while 1:
-        if pygame.mixer.music.get_pos() >= beat_duration * 1000:
+        if pygame.mixer.music.get_pos()*.85 >= beat_duration * 1000:
+            print 'mixer get pos was %s' % (pygame.mixer.music.get_pos())
             pygame.mixer.music.stop()
             break    
 
@@ -118,7 +121,7 @@ def play_three_beats(beat_index, track, distance_matrix, threshold):
     fourth = [distance_vector[4], distance_matrix[distance_vector[4],beat_index]]
     fifth = [distance_vector[5], distance_matrix[distance_vector[5],beat_index]]
     for item in [closest, second, third, fourth, fifth]:
-        if item[1] <= threshold and abs(item[0] - beat_index) > 10:  
+        if item[1] <= threshold and abs(item[0] - beat_index) > .10*len(track.analysis.beats):  
             print "get ready for first beat"
             play_beat(beat_index, track)
             sleep(1)
@@ -127,10 +130,37 @@ def play_three_beats(beat_index, track, distance_matrix, threshold):
             print beat_index, item
             sleep(3)
 
+'''
+def get_jump_decision(jump_probability, count_since_last_jump, current_beat):
+## DECIDE IF JUMP SHOULD HAPPEN
+## FUNCTION OF PROBABILITY (USER CONTROLLED), TIME SINCE LAST JUMP
+## IF AT FINAL POSSIBLE JUMP POINT, MAKE A BACKWARDS JUMP
+    return jump_decision, new_count
+    
+def which_beat_next(current_beat):
+## USE JUMP DECISION TO FIGURE OUT IF WE SHOULD JUMP
+## IF YES, GET A NEW VALUE TO JUMP TO
+## IF NO, INCREMENT BEAT
+    return next_beat
+'''   
 
-#def get_beat_jumps(beat):
-    # first.argsort
+def test(track):
+    duration = 0
+    duration += track.analysis.beats[20].duration
+    print 'expected start is %s' %track.analysis.beats[20].start
+    print 'expected duration is %s' % duration
+    start_test = dt.now()
+    for beat in range(20,21):
+        play_beat(beat, track)
+    end = dt.now() - start_test 
+    print 'actual duration was %s' % end
 
+def play_song(track, distance):
+    threshold = .1*np.ptp(distance) + np.min(distance)
+    
+    for beat_index in range(0,len(track.analysis.beats)):
+        play_three_beats(beat_index, track, distance, threshold)
+        
 if __name__ == "__main__":    
     
     weights = {
@@ -168,14 +198,11 @@ if __name__ == "__main__":
 
     pygame.mixer.init()
     
-    pygame.mixer.music.load('the88.ogg')
+    pygame.mixer.music.load(args[0])
     print "GOT DISTANCE MATRICES AND LOADED SONG, CURRENTLY AT %s" % (dt.now() - start)
     
-    threshold = .1*np.ptp(distance) + np.min(distance)
-    
-    for beat_index in range(0,len(track.analysis.beats)):
-        play_three_beats(beat_index, track, distance, threshold)
-        
+    play_song(track, distance)
+    #test(track)   
 #    for item in list(np.where(distance[:,100].argsort() <= 8))[0]:
 #       ....:     play_beat(item, track)
 
